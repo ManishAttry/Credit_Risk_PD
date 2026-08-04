@@ -1,0 +1,3 @@
+Model,AUC,Gini
+Logistic Regression,0.6679,0.3358
+Random Forest,0.6889,0.3779
