@@ -136,6 +136,7 @@ credit_risk_pd/
 | Total ECL provision | **$793 million** |
 
 ---
+![A header image "how to clone a Git repo if you're new to git or unfamiliar with it"](assets/Power_BI_Dashboard.png)
 
 ## 📊 Power BI Dashboard
 
@@ -267,7 +268,7 @@ Open the notebooks in order:
 ## 💡 To use these templates
 Templates are provided either as Power BI Desktop (.pbix) or [Power BI projects (.pbip)](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview) files. I recommend that you use the .pbip format. 
 
-![A header image "how to clone a Git repo if you're new to git or unfamiliar with it"](clone-repo-github-header.png)
+![A header image "how to clone a Git repo if you're new to git or unfamiliar with it"](assets/clone-repo-github-header.png)
 
 ### How to clone a repository by using Git
 To use these templates, I recommend that you _clone_ (or copy) this Git repo to your local machine. If you're unfamiliar with Git, cloning allows you to ensure you have a syncronized local copy of the repository. You use a tool like VS Code to open the folder, check for changes, and sync to get the latest updates. To clone the Git repo:
@@ -310,20 +311,6 @@ __I recommend the .pbip format for templates for the following reasons:__
 
 ![Image header "bar chart templates"](assets/bar-chart-templates.png)
 
-
-### Core visuals - SVG measures
-These use a combination of formatting options as well as SVG custom microvisualizations rendered as image URLs in the core visuals. 
-
-**These SVG measure templates were created by Štěpán Rešl.**
-
-<a href="kpi-cards/all-kpi-card-templates/"><img src="kpi-cards/all-kpi-card-templates/KPIs and Cards in Power BI (SVGs).png"/></a>
-
-<br><br>
-
-## Remark
-I don't consider myself a "dataviz person"; these comments are my subjective opinions and experience. I'm just sharing these templates because they might be helpful to others.
-
----
 
 ## 👤 Author
 
