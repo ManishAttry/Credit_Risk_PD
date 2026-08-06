@@ -169,7 +169,7 @@ The Power BI dashboard (`credit_risk_pd.pbix`) connects directly to the 4 output
 - **ECL Bar Chart:** Provision amount by stage in $M
 - **Summary Table:** Full IFRS9 table with loan count, avg PD, total EAD, total ECL, and ECL as % of EAD per stage
 
-![A header image "how a PowerBI Dashboard look"](assets/Power_BI_Dashboard.png)
+![A header image "how a PowerBI Dashboard look"](assets/Power_BI_Dashboard_collage.png)
 
 ---
 
