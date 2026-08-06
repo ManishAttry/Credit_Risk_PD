@@ -94,7 +94,7 @@ credit_risk_pd/
 │       └── model_performance.csv    # AUC and Gini for both models
 │
 ├── 📂 notebooks/
-│   └── 03_model_shap.ipynb     # Model training, evaluation, IFRS9, export
+│   └── Credit_RIsk_PD.ipynb     # Model training, evaluation, IFRS9, export
 │
 ├── 📂 website/                 # Standalone web application
 │   └── index.html              # Main page + prediction interface
@@ -169,6 +169,8 @@ The Power BI dashboard (`credit_risk_pd.pbix`) connects directly to the 4 output
 - **ECL Bar Chart:** Provision amount by stage in $M
 - **Summary Table:** Full IFRS9 table with loan count, avg PD, total EAD, total ECL, and ECL as % of EAD per stage
 
+![A header image "how a PowerBI Dashboard look"](assets/Power_BI_Dashboard.png)
+
 ---
 
 ## 💡 To use these templates
@@ -191,6 +193,7 @@ To use these templates, I recommend that you _clone_ (or copy) this Git repo to 
 
 <br>
 
+![An image depicting how to clone a repository in VS code](assets/clone-repo-vscode.png)
 
 ### Create a virtual environment
 
@@ -230,11 +233,6 @@ Open the notebooks in order:
 `Credit_RIsk_PD.ipynb`
 
 
-
-
-![An image depicting how to clone a repository in VS code](assets/clone-repo-vscode.png)
-
-![An image depicting how to clone a repository in GitHub](assets/clone-repo-github.png)
 
 ![A header image "how to enable and use PBIP files"](assets/how-to-enable-pbip-format-header.png)
 
