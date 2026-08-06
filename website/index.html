@@ -1,501 +1,329 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Credit Risk PD Model | Manish Kumar</title>
   <meta name="description" content="End-to-end credit risk probability of default model with IFRS9 staging and ECL estimation." />
 
-  <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Around Theme CSS (only external CSS) -->
+  <link rel="stylesheet" href="https://around.createx.studio/assets/css/theme.min.css" />
   <!-- Bootstrap Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ── Page-level overrides using Around CSS vars only ─────── */
+    html, body { scroll-behavior: smooth; }
+
+    /* Hero section */
+    .cr-hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 0 60px;
+      position: relative;
+      overflow: hidden;
+      background: var(--ar-body-bg);
+    }
+    .cr-grid-bg {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(68,140,116,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(68,140,116,.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .cr-orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(90px); pointer-events: none;
+    }
+    .cr-orb-1 {
+      width: 480px; height: 480px; top: -80px; left: -80px;
+      background: radial-gradient(circle, rgba(68,140,116,.18), transparent 70%);
+    }
+    .cr-orb-2 {
+      width: 360px; height: 360px; bottom: 0; right: -60px;
+      background: radial-gradient(circle, rgba(63,127,202,.12), transparent 70%);
+    }
+
+    /* Gradient text using Around primary */
+    .cr-gradient-text {
+      background: linear-gradient(90deg, var(--ar-primary), #3f7fca);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Hero badge */
+    .cr-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px; border-radius: 50rem;
+      background: rgba(68,140,116,.12);
+      border: 1px solid rgba(68,140,116,.25);
+      color: var(--ar-primary); font-size: .8rem; font-weight: 500;
+      margin-bottom: 1.5rem;
+    }
+
+    /* Stat row */
+    .cr-stat-row { display: flex; align-items: center; gap: 1.5rem; margin-top: 2rem; }
+    .cr-stat-val { font-size: 1.75rem; font-weight: 700; color: var(--ar-heading-color); font-family: var(--ar-font-monospace); }
+    .cr-stat-lbl { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--ar-secondary-color); margin-top: 2px; }
+    .cr-divider { width: 1px; height: 40px; background: var(--ar-border-color); }
+
+    /* Dashboard mockup card */
+    .cr-mockup {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius-xxl); padding: 1.25rem;
+      max-width: 440px; margin: 0 auto;
+    }
+    .cr-mockup-dots { display: flex; gap: 6px; margin-bottom: 1rem; }
+    .cr-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .cr-mockup-kpi { display: flex; justify-content: space-around; margin-bottom: 1rem; }
+    .cr-mkpi-v { font-size: 1.1rem; font-weight: 700; color: var(--ar-heading-color); font-family: var(--ar-font-monospace); }
+    .cr-mkpi-l { font-size: .65rem; color: var(--ar-secondary-color); text-transform: uppercase; letter-spacing: .05em; }
+
+    .cr-stage-row { display: flex; gap: 6px; margin-top: .75rem; }
+    .cr-stage {
+      flex: 1; border-radius: var(--ar-border-radius-sm);
+      padding: 6px 4px; text-align: center;
+      font-size: .7rem; font-weight: 600;
+    }
+    .cr-stage-1 { background: rgba(63,202,144,.12); color: var(--ar-success); border: 1px solid rgba(63,202,144,.2); }
+    .cr-stage-2 { background: rgba(237,203,80,.12); color: var(--ar-warning); border: 1px solid rgba(237,203,80,.2); }
+    .cr-stage-3 { background: rgba(237,80,80,.12); color: var(--ar-danger); border: 1px solid rgba(237,80,80,.2); }
+    .cr-stage small { display: block; font-weight: 400; opacity: .8; }
+
+    /* Floating cards */
+    .cr-float-wrap { position: relative; padding: 40px 20px; }
+    .cr-float-card {
+      position: absolute;
+      background: var(--ar-secondary-bg);
+      border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius-lg);
+      padding: 12px 14px; min-width: 160px; z-index: 10;
+    }
+    .cr-float-card.fc-tr { top: 8px; right: -8px; animation: crFloat 4s ease-in-out infinite; }
+    .cr-float-card.fc-bl { bottom: 8px; left: -8px; animation: crFloat 4s ease-in-out infinite 2s; }
+    .cr-fc-lbl { font-size: .65rem; color: var(--ar-secondary-color); text-transform: uppercase; letter-spacing: .05em; }
+    .cr-fc-val { font-size: .95rem; font-weight: 700; font-family: var(--ar-font-monospace); margin-top: 3px; }
+    .cr-fc-bar { height: 4px; background: var(--ar-border-color); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+    .cr-fc-fill { height: 100%; background: linear-gradient(90deg, var(--ar-primary), #3f7fca); border-radius: 2px; }
+
+    @keyframes crFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    /* Section helpers */
+    .cr-section { padding: 80px 0; }
+    .cr-section-alt { background: var(--ar-secondary-bg); }
+    .cr-eyebrow {
+      display: inline-block; font-size: .7rem; font-weight: 600;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--ar-primary); margin-bottom: .75rem;
+    }
+
+    /* Pipeline */
+    .cr-pipeline { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 3rem; }
+    .cr-pipe-step {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius); padding: 12px 14px; text-align: center; min-width: 96px;
+    }
+    .cr-pipe-step.active { background: rgba(68,140,116,.1); border-color: rgba(68,140,116,.4); }
+    .cr-pipe-num { font-size: .65rem; font-family: var(--ar-font-monospace); color: var(--ar-primary); font-weight: 600; margin-bottom: 4px; }
+    .cr-pipe-lbl { font-size: .75rem; font-weight: 600; color: var(--ar-heading-color); line-height: 1.4; }
+    .cr-pipe-lbl small { color: var(--ar-secondary-color); font-weight: 400; display: block; }
+    .cr-pipe-arrow { color: var(--ar-secondary-color); font-size: 1rem; }
+
+    /* Metric cards */
+    .cr-metric-val { font-size: 2rem; font-weight: 700; font-family: var(--ar-font-monospace); }
+    .cr-metric-lbl { font-size: .75rem; font-weight: 600; color: var(--ar-secondary-color); margin-top: 4px; }
+    .cr-metric-sub { font-size: .65rem; color: var(--ar-secondary-color); margin-top: 2px; }
+
+    /* Chart containers */
+    .cr-chart-card {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius-xxl); padding: 1.5rem;
+    }
+    .cr-chart-title { font-size: .85rem; font-weight: 600; color: var(--ar-heading-color); margin-bottom: 1rem; }
+
+    /* Stage cards */
+    .cr-stage-card {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius-xxl); padding: 1.75rem 1.5rem;
+      transition: transform .25s ease;
+    }
+    .cr-stage-card:hover { transform: translateY(-4px); }
+    .cr-stage-card.s1 { border-top: 3px solid var(--ar-success); }
+    .cr-stage-card.s2 { border-top: 3px solid var(--ar-warning); }
+    .cr-stage-card.s3 { border-top: 3px solid var(--ar-danger); }
+    .cr-stage-badge { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+    .cr-stage-thresh { font-size: 1.4rem; font-weight: 700; font-family: var(--ar-font-monospace); color: var(--ar-heading-color); }
+    .cr-stage-status { font-size: .8rem; color: var(--ar-secondary-color); margin-top: 4px; }
+    .cr-stage-stat { display: flex; justify-content: space-between; padding: 5px 0; }
+    .cr-stage-stat-v { font-size: .9rem; font-weight: 700; font-family: var(--ar-font-monospace); color: var(--ar-heading-color); }
+    .cr-stage-stat-l { font-size: .75rem; color: var(--ar-secondary-color); }
+    .cr-stage-prov { font-size: .65rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ar-secondary-color); margin-top: .75rem; }
+    hr.cr-hr { border-color: var(--ar-border-color); opacity: 1; margin: 1rem 0; }
+
+    /* Tech pills */
+    .cr-tech-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .cr-tech-pill {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: 50rem; padding: 8px 18px; font-size: .85rem; font-weight: 500;
+      color: var(--ar-secondary-color); transition: background .2s, border-color .2s, color .2s; cursor: default;
+    }
+    .cr-tech-pill:hover { background: rgba(68,140,116,.1); border-color: rgba(68,140,116,.4); color: var(--ar-primary); }
+
+    /* Prediction form */
+    .cr-form-card {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius-xxl); padding: 1.75rem;
+    }
+    .cr-form-section-title { font-size: .9rem; font-weight: 600; color: var(--ar-heading-color); }
+
+    /* Result panel */
+    .cr-result-panel {
+      background: var(--ar-secondary-bg); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius-xxl); padding: 1.75rem;
+      min-height: 500px; display: flex; flex-direction: column;
+    }
+    .cr-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; }
+    .cr-placeholder-icon { font-size: 3rem; color: var(--ar-border-color); margin-bottom: 1rem; }
+    .cr-pd-number { font-size: 2.75rem; font-weight: 800; font-family: var(--ar-font-monospace); text-align: center; }
+    .cr-pd-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--ar-secondary-color); text-align: center; margin-top: 4px; }
+
+    /* Risk bar */
+    .cr-risk-track {
+      position: relative; height: 28px; border-radius: 50rem; overflow: visible;
+      border: 1px solid var(--ar-border-color);
+      background: linear-gradient(90deg,
+        rgba(63,202,144,.25) 0% 33%,
+        rgba(237,203,80,.25) 33% 66%,
+        rgba(237,80,80,.25) 66% 100%
+      );
+    }
+    .cr-risk-zones { display: flex; height: 100%; border-radius: 50rem; overflow: hidden; }
+    .cr-rz { flex: 1; display: flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+    .cr-rz.g { color: var(--ar-success); } .cr-rz.a { color: var(--ar-warning); } .cr-rz.r { color: var(--ar-danger); }
+    .cr-needle {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 14px; height: 14px; border-radius: 50%; background: #fff;
+      border: 2px solid rgba(0,0,0,.3); box-shadow: 0 0 6px rgba(255,255,255,.4);
+      transition: left .6s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    /* Mini result cards */
+    .cr-mini-card {
+      background: rgba(255,255,255,.04); border: 1px solid var(--ar-border-color);
+      border-radius: var(--ar-border-radius); padding: 12px 8px; text-align: center;
+    }
+    .cr-mini-lbl { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ar-secondary-color); margin-bottom: 4px; }
+    .cr-mini-val { font-size: .95rem; font-weight: 700; font-family: var(--ar-font-monospace); color: var(--ar-heading-color); }
+
+    /* Recommendation */
+    .cr-rec {
+      background: rgba(68,140,116,.08); border: 1px solid rgba(68,140,116,.2);
+      border-radius: var(--ar-border-radius); padding: 14px;
+    }
+    .cr-rec-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ar-primary); margin-bottom: 6px; }
+    .cr-rec-body { font-size: .8rem; color: var(--ar-secondary-color); line-height: 1.6; }
+
+    /* Stage result border colours */
+    .cr-stage-result-1 { border-color: rgba(63,202,144,.4) !important; background: rgba(63,202,144,.06) !important; }
+    .cr-stage-result-2 { border-color: rgba(237,203,80,.4)  !important; background: rgba(237,203,80,.06)  !important; }
+    .cr-stage-result-3 { border-color: rgba(237,80,80,.4)   !important; background: rgba(237,80,80,.06)   !important; }
+
+    /* Table */
+    .cr-compare-table th { font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--ar-secondary-color); border-bottom: 1px solid var(--ar-border-color) !important; padding: 10px 12px; }
+    .cr-compare-table td { color: var(--ar-secondary-color); border-bottom: 1px solid var(--ar-border-color) !important; padding: 10px 12px; vertical-align: middle; }
+
+    /* Footer */
+    .cr-footer { background: var(--ar-secondary-bg); border-top: 1px solid var(--ar-border-color); padding: 40px 0; }
+    .cr-footer-brand { font-size: 1.2rem; font-weight: 700; color: var(--ar-heading-color); }
+    .cr-footer-link { font-size: .8rem; color: var(--ar-secondary-color); text-decoration: none; transition: color .2s; }
+    .cr-footer-link:hover { color: var(--ar-primary); }
+
+    /* Spinner */
+    .cr-spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; display: inline-block; animation: crSpin .6s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes crSpin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 991.98px) {
+      .cr-float-wrap { display: none; }
+      .cr-pipeline { flex-direction: column; align-items: flex-start; }
+      .cr-pipe-arrow { transform: rotate(90deg); }
+    }
+    @media (max-width: 575.98px) {
+      .cr-section { padding: 56px 0; }
+      .cr-stat-row { gap: 1rem; }
+      .cr-stat-val { font-size: 1.25rem; }
+    }
+
+    /* Fade-in animation */
+    @keyframes crFadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+    .cr-anim { animation: crFadeUp .5s ease both; }
+    .cr-anim-1 { animation-delay: .1s; }
+    .cr-anim-2 { animation-delay: .2s; }
+    .cr-anim-3 { animation-delay: .3s; }
+    .cr-anim-4 { animation-delay: .4s; }
+  </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════
-     NAVIGATION
-═══════════════════════════════════════════════════════════ -->
-<nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
+<!-- ═══════════════════════════════════════════════ PREDICT -->
+<section id="predict" class="cr-section cr-section-alt">
   <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="#home">
-      <div class="brand-icon"><i class="bi bi-shield-check"></i></div>
-      <span class="brand-text">CreditRisk<span class="brand-accent">PD</span></span>
-    </a>
-    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navContent">
-      <ul class="navbar-nav ms-auto gap-1">
-        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="#metrics">Metrics</a></li>
-        <li class="nav-item"><a class="nav-link" href="#ifrs9">IFRS9</a></li>
-        <li class="nav-item"><a class="nav-link" href="#tech">Tech Stack</a></li>
-        <li class="nav-item">
-          <a class="nav-link btn-predict-nav" href="#predict">
-            <i class="bi bi-cpu me-1"></i>Try Predictor
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<!-- ═══════════════════════════════════════════════════════════
-     HERO SECTION
-═══════════════════════════════════════════════════════════ -->
-<section id="home" class="hero-section">
-  <div class="hero-bg-grid"></div>
-  <div class="hero-orb hero-orb-1"></div>
-  <div class="hero-orb hero-orb-2"></div>
-
-  <div class="container position-relative">
-    <div class="row align-items-center min-vh-100 py-5">
-      <div class="col-lg-6" data-aos="fade-right">
-        <div class="hero-badge mb-4">
-          <i class="bi bi-bank me-2"></i>Banking Analytics · IFRS9 · Basel III
-        </div>
-        <h1 class="hero-title">
-          Credit Risk<br />
-          <span class="gradient-text">Probability of</span><br />
-          Default Model
-        </h1>
-        <p class="hero-subtitle mt-4">
-          End-to-end PD modelling pipeline built on 2.2 million LendingClub loans.
-          WoE/IV feature selection · Logistic Regression · Random Forest ·
-          IFRS9 Stage 1/2/3 classification · $793M ECL estimation.
-        </p>
-        <div class="hero-stats-row mt-5">
-          <div class="hero-stat">
-            <div class="hero-stat-val">0.689</div>
-            <div class="hero-stat-lbl">AUC-ROC</div>
-          </div>
-          <div class="hero-stat-divider"></div>
-          <div class="hero-stat">
-            <div class="hero-stat-val">261K</div>
-            <div class="hero-stat-lbl">Loans Scored</div>
-          </div>
-          <div class="hero-stat-divider"></div>
-          <div class="hero-stat">
-            <div class="hero-stat-val">$793M</div>
-            <div class="hero-stat-lbl">ECL Estimated</div>
-          </div>
-        </div>
-        <div class="hero-actions mt-5 d-flex gap-3 flex-wrap">
-          <a href="#predict" class="btn btn-primary-gradient btn-lg">
-            <i class="bi bi-cpu me-2"></i>Run Prediction
-          </a>
-          <a href="https://github.com/YOUR_USERNAME/credit-risk-pd-model"
-             class="btn btn-glass btn-lg" target="_blank">
-            <i class="bi bi-github me-2"></i>View on GitHub
-          </a>
-        </div>
-      </div>
-
-      <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
-        <div class="hero-card-stack">
-          <!-- Floating metric card 1 -->
-          <div class="floating-card fc-top-right">
-            <div class="fc-label">Random Forest</div>
-            <div class="fc-value text-success">AUC 0.689</div>
-            <div class="fc-bar"><div class="fc-bar-fill" style="width:68.9%"></div></div>
-          </div>
-          <!-- Main dashboard mockup -->
-          <div class="dashboard-mockup glass-card">
-            <div class="mockup-header">
-              <div class="mockup-dots">
-                <span class="dot-red"></span>
-                <span class="dot-amber"></span>
-                <span class="dot-green"></span>
-              </div>
-              <span class="mockup-title">credit_risk_pd.pbix</span>
-            </div>
-            <div class="mockup-kpi-row">
-              <div class="mkpi"><div class="mkpi-v">261K</div><div class="mkpi-l">Loans</div></div>
-              <div class="mkpi"><div class="mkpi-v text-danger">20.1%</div><div class="mkpi-l">Default Rate</div></div>
-              <div class="mkpi"><div class="mkpi-v text-warning">$793M</div><div class="mkpi-l">ECL</div></div>
-            </div>
-            <canvas id="heroChart" height="140"></canvas>
-            <div class="mockup-stage-row mt-3">
-              <div class="mstage s1"><span>S1</span><small>55</small></div>
-              <div class="mstage s2"><span>S2</span><small>19K</small></div>
-              <div class="mstage s3"><span>S3</span><small>242K</small></div>
-            </div>
-          </div>
-          <!-- Floating metric card 2 -->
-          <div class="floating-card fc-bottom-left">
-            <div class="fc-label">ECL by Stage</div>
-            <div class="d-flex gap-2 mt-1">
-              <span class="stage-pill s1p">S1 $14K</span>
-              <span class="stage-pill s2p">S2 $18M</span>
-              <span class="stage-pill s3p">S3 $775M</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════
-     ABOUT SECTION
-═══════════════════════════════════════════════════════════ -->
-<section id="about" class="section-pad">
-  <div class="container">
-    <div class="section-header text-center mb-5">
-      <div class="section-eyebrow">About the Project</div>
-      <h2 class="section-title">What is Probability of Default?</h2>
-    </div>
-
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="about-card glass-card h-100">
-          <div class="about-icon"><i class="bi bi-graph-up-arrow"></i></div>
-          <h5>Credit Risk Modelling</h5>
-          <p>PD models estimate the likelihood a borrower will default within a 12-month or lifetime horizon. Banks use this to decide loan approvals, set interest rates, and calculate capital reserves.</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="about-card glass-card h-100">
-          <div class="about-icon text-warning"><i class="bi bi-building-check"></i></div>
-          <h5>IFRS9 Compliance</h5>
-          <p>Since 2018, IFRS9 mandates that banks provision for expected losses before they occur. This project maps PD scores directly to Stage 1/2/3 classifications and calculates the required ECL.</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="about-card glass-card h-100">
-          <div class="about-icon text-success"><i class="bi bi-currency-dollar"></i></div>
-          <h5>Business Impact</h5>
-          <p>Accurate PD models reduce credit losses, optimise loan pricing, and enable early intervention on deteriorating loans. This project quantifies $793M in expected credit losses across 261K test loans.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Pipeline steps -->
-    <div class="pipeline-row mt-5">
-      <div class="pipe-step">
-        <div class="pipe-num">01</div>
-        <div class="pipe-label">Raw Data<br/><small>2.2M loans · 1.2GB</small></div>
-      </div>
-      <div class="pipe-arrow"><i class="bi bi-arrow-right"></i></div>
-      <div class="pipe-step">
-        <div class="pipe-num">02</div>
-        <div class="pipe-label">EDA &amp; Clean<br/><small>Filter · Impute · Scale</small></div>
-      </div>
-      <div class="pipe-arrow"><i class="bi bi-arrow-right"></i></div>
-      <div class="pipe-step">
-        <div class="pipe-num">03</div>
-        <div class="pipe-label">WoE / IV<br/><small>11 features selected</small></div>
-      </div>
-      <div class="pipe-arrow"><i class="bi bi-arrow-right"></i></div>
-      <div class="pipe-step">
-        <div class="pipe-num">04</div>
-        <div class="pipe-label">ML Models<br/><small>LR · RF · SMOTE</small></div>
-      </div>
-      <div class="pipe-arrow"><i class="bi bi-arrow-right"></i></div>
-      <div class="pipe-step">
-        <div class="pipe-num">05</div>
-        <div class="pipe-label">IFRS9 Stage<br/><small>PD → S1/S2/S3</small></div>
-      </div>
-      <div class="pipe-arrow"><i class="bi bi-arrow-right"></i></div>
-      <div class="pipe-step active">
-        <div class="pipe-num">06</div>
-        <div class="pipe-label">ECL Report<br/><small>$793M provision</small></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════
-     METRICS SECTION
-═══════════════════════════════════════════════════════════ -->
-<section id="metrics" class="section-pad section-alt">
-  <div class="container">
-    <div class="section-header text-center mb-5">
-      <div class="section-eyebrow">Model Performance</div>
-      <h2 class="section-title">Evaluation Results</h2>
-    </div>
-
-    <!-- KPI cards -->
-    <div class="row g-4 mb-5">
-      <div class="col-6 col-md-3">
-        <div class="metric-card glass-card text-center">
-          <div class="metric-val text-primary">0.6889</div>
-          <div class="metric-label">Best AUC-ROC</div>
-          <div class="metric-sub">Random Forest</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="metric-card glass-card text-center">
-          <div class="metric-val text-success">0.3779</div>
-          <div class="metric-label">Best Gini</div>
-          <div class="metric-sub">Random Forest</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="metric-card glass-card text-center">
-          <div class="metric-val text-warning">11</div>
-          <div class="metric-label">Features Selected</div>
-          <div class="metric-sub">IV &gt; 0.02</div>
-        </div>
-      </div>
-      <div class="col-6 col-md-3">
-        <div class="metric-card glass-card text-center">
-          <div class="metric-val text-danger">20.1%</div>
-          <div class="metric-label">Default Rate</div>
-          <div class="metric-sub">Test set</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Charts row -->
-    <div class="row g-4">
-      <div class="col-lg-6">
-        <div class="chart-card glass-card">
-          <h6 class="chart-card-title">ROC Curve — Model Comparison</h6>
-          <canvas id="rocChart" height="260"></canvas>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="chart-card glass-card">
-          <h6 class="chart-card-title">Feature IV Scores (Top 8)</h6>
-          <canvas id="ivChart" height="260"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- Model comparison table -->
-    <div class="row mt-4">
-      <div class="col-lg-8 mx-auto">
-        <div class="glass-card p-4">
-          <h6 class="chart-card-title mb-3">Model Comparison</h6>
-          <div class="table-responsive">
-            <table class="table table-dark table-borderless comparison-table">
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Logistic Regression</th>
-                  <th>Random Forest</th>
-                  <th>Winner</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>AUC-ROC</td>
-                  <td>0.6679</td>
-                  <td class="text-success fw-semibold">0.6889</td>
-                  <td><span class="badge bg-success">RF</span></td>
-                </tr>
-                <tr>
-                  <td>Gini</td>
-                  <td>0.3358</td>
-                  <td class="text-success fw-semibold">0.3779</td>
-                  <td><span class="badge bg-success">RF</span></td>
-                </tr>
-                <tr>
-                  <td>Interpretability</td>
-                  <td class="text-success">✅ Scorecard-ready</td>
-                  <td class="text-danger">❌ Black box</td>
-                  <td><span class="badge bg-primary">LR</span></td>
-                </tr>
-                <tr>
-                  <td>IFRS9 / Regulatory fit</td>
-                  <td class="text-success">✅ Auditable</td>
-                  <td class="text-warning">⚠️ SHAP needed</td>
-                  <td><span class="badge bg-primary">LR</span></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════
-     IFRS9 SECTION
-═══════════════════════════════════════════════════════════ -->
-<section id="ifrs9" class="section-pad">
-  <div class="container">
-    <div class="section-header text-center mb-5">
-      <div class="section-eyebrow">Regulatory Framework</div>
-      <h2 class="section-title">IFRS9 Staging Results</h2>
-      <p class="section-desc">
-        PD scores from the logistic regression are mapped to IFRS9 stages.<br />
-        ECL = PD × LGD (45%) × EAD
-      </p>
-    </div>
-
-    <!-- Stage cards -->
-    <div class="row g-4 mb-5">
-      <div class="col-md-4">
-        <div class="stage-card stage-card-1 glass-card text-center h-100">
-          <div class="stage-badge-lg">Stage 1</div>
-          <div class="stage-threshold">PD &lt; 5%</div>
-          <div class="stage-status">Performing</div>
-          <hr class="stage-divider"/>
-          <div class="stage-stat"><span class="stage-stat-val">55</span><span class="stage-stat-lbl">Loans</span></div>
-          <div class="stage-stat"><span class="stage-stat-val">2.0%</span><span class="stage-stat-lbl">Avg PD</span></div>
-          <div class="stage-stat"><span class="stage-stat-val">$14,502</span><span class="stage-stat-lbl">Total ECL</span></div>
-          <div class="stage-provision mt-3">12-month ECL provision</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="stage-card stage-card-2 glass-card text-center h-100">
-          <div class="stage-badge-lg">Stage 2</div>
-          <div class="stage-threshold">PD 5–20%</div>
-          <div class="stage-status">Underperforming</div>
-          <hr class="stage-divider"/>
-          <div class="stage-stat"><span class="stage-stat-val">19,444</span><span class="stage-stat-lbl">Loans</span></div>
-          <div class="stage-stat"><span class="stage-stat-val">16.0%</span><span class="stage-stat-lbl">Avg PD</span></div>
-          <div class="stage-stat"><span class="stage-stat-val">$18.3M</span><span class="stage-stat-lbl">Total ECL</span></div>
-          <div class="stage-provision mt-3">Lifetime ECL provision</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="stage-card stage-card-3 glass-card text-center h-100">
-          <div class="stage-badge-lg">Stage 3</div>
-          <div class="stage-threshold">PD &gt; 20%</div>
-          <div class="stage-status">Credit-impaired</div>
-          <hr class="stage-divider"/>
-          <div class="stage-stat"><span class="stage-stat-val">241,711</span><span class="stage-stat-lbl">Loans</span></div>
-          <div class="stage-stat"><span class="stage-stat-val">47.0%</span><span class="stage-stat-lbl">Avg PD</span></div>
-          <div class="stage-stat"><span class="stage-stat-val">$775M</span><span class="stage-stat-lbl">Total ECL</span></div>
-          <div class="stage-provision mt-3">Full impairment provision</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- IFRS9 charts -->
-    <div class="row g-4">
-      <div class="col-lg-5">
-        <div class="chart-card glass-card">
-          <h6 class="chart-card-title">Loan Distribution by Stage</h6>
-          <canvas id="ifrs9DonutChart" height="240"></canvas>
-        </div>
-      </div>
-      <div class="col-lg-7">
-        <div class="chart-card glass-card">
-          <h6 class="chart-card-title">ECL Provision by Stage ($M)</h6>
-          <canvas id="eclChart" height="240"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════
-     TECH STACK SECTION
-═══════════════════════════════════════════════════════════ -->
-<section id="tech" class="section-pad section-alt">
-  <div class="container">
-    <div class="section-header text-center mb-5">
-      <div class="section-eyebrow">Tools & Technologies</div>
-      <h2 class="section-title">Tech Stack</h2>
-    </div>
-    <div class="tech-grid">
-      <div class="tech-pill"><i class="bi bi-filetype-py me-2"></i>Python 3.9+</div>
-      <div class="tech-pill"><i class="bi bi-table me-2"></i>Pandas</div>
-      <div class="tech-pill"><i class="bi bi-cpu me-2"></i>Scikit-learn</div>
-      <div class="tech-pill"><i class="bi bi-tree me-2"></i>XGBoost</div>
-      <div class="tech-pill"><i class="bi bi-bar-chart me-2"></i>SHAP</div>
-      <div class="tech-pill"><i class="bi bi-graph-up me-2"></i>Matplotlib</div>
-      <div class="tech-pill"><i class="bi bi-palette me-2"></i>Seaborn</div>
-      <div class="tech-pill"><i class="bi bi-grid-3x3 me-2"></i>Power BI</div>
-      <div class="tech-pill"><i class="bi bi-diagram-3 me-2"></i>Tableau</div>
-      <div class="tech-pill"><i class="bi bi-journal-code me-2"></i>Jupyter</div>
-      <div class="tech-pill"><i class="bi bi-git me-2"></i>Git / GitHub</div>
-      <div class="tech-pill"><i class="bi bi-braces me-2"></i>Chart.js</div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════════════════════════════════════════
-     PREDICTION SECTION
-═══════════════════════════════════════════════════════════ -->
-<section id="predict" class="section-pad">
-  <div class="container">
-    <div class="section-header text-center mb-5">
-      <div class="section-eyebrow">Live Demo</div>
-      <h2 class="section-title">Predict Default Probability</h2>
-      <p class="section-desc">
-        Enter loan details below. The model scores the application and returns a PD estimate,
-        IFRS9 stage, and ECL — the same output used in the full pipeline.
-        <br/><small class="text-muted">Currently using a JavaScript simulation. Flask API integration ready.</small>
+    <div class="text-center mb-5">
+      <div class="cr-eyebrow">Live Demo</div>
+      <h2 class="h1 fw-bold">Predict Default Probability</h2>
+      <p class="lead" style="font-size:.9rem;max-width:540px;margin:1rem auto 0;">
+        Enter loan details below. Returns PD estimate, IFRS9 stage, ECL, and risk charts.
       </p>
     </div>
 
     <div class="row g-4">
-      <!-- ── Prediction Form ── -->
+      <!-- Form -->
       <div class="col-lg-7">
-        <div class="glass-card p-4">
-          <h6 class="form-section-title mb-4"><i class="bi bi-file-earmark-text me-2"></i>Loan Application Details</h6>
-
+        <div class="cr-form-card">
+          <div class="cr-form-section-title mb-4"><i class="bi bi-file-earmark-text me-2"></i>Loan Application Details</div>
           <div class="row g-3">
-            <!-- Loan Amount -->
             <div class="col-md-6">
               <label class="form-label">Loan Amount ($)</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="loan_amnt" placeholder="e.g. 15000" min="1000" max="40000" value="15000"/>
+              <input type="number" class="form-control" id="loan_amnt" value="15000" min="1000" max="40000" placeholder="e.g. 15000"/>
             </div>
-            <!-- Interest Rate -->
             <div class="col-md-6">
               <label class="form-label">Interest Rate (%)</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="int_rate" placeholder="e.g. 13.5" step="0.01" min="5" max="36" value="13.5"/>
+              <input type="number" class="form-control" id="int_rate" value="13.5" step="0.01" min="5" max="36" placeholder="e.g. 13.5"/>
             </div>
-            <!-- Annual Income -->
             <div class="col-md-6">
               <label class="form-label">Annual Income ($)</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="annual_inc" placeholder="e.g. 60000" min="10000" value="60000"/>
+              <input type="number" class="form-control" id="annual_inc" value="60000" min="10000" placeholder="e.g. 60000"/>
             </div>
-            <!-- DTI -->
             <div class="col-md-6">
               <label class="form-label">Debt-to-Income Ratio (%)</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="dti" placeholder="e.g. 18.5" step="0.1" min="0" max="100" value="18.5"/>
+              <input type="number" class="form-control" id="dti" value="18.5" step="0.1" min="0" max="100" placeholder="e.g. 18.5"/>
             </div>
-            <!-- Employment Length -->
             <div class="col-md-6">
               <label class="form-label">Employment Length</label>
-              <select class="form-select form-control-dark" id="emp_length">
-                <option value="0">< 1 year</option>
-                <option value="1">1 year</option>
-                <option value="2">2 years</option>
-                <option value="3">3 years</option>
-                <option value="4">4 years</option>
-                <option value="5" selected>5 years</option>
-                <option value="6">6 years</option>
-                <option value="7">7 years</option>
-                <option value="8">8 years</option>
-                <option value="9">9 years</option>
-                <option value="10">10+ years</option>
-                <option value="-1">Unknown</option>
+              <select class="form-select" id="emp_length">
+                <option value="0">&lt; 1 year</option><option value="1">1 year</option><option value="2">2 years</option>
+                <option value="3">3 years</option><option value="4">4 years</option><option value="5" selected>5 years</option>
+                <option value="6">6 years</option><option value="7">7 years</option><option value="8">8 years</option>
+                <option value="9">9 years</option><option value="10">10+ years</option><option value="-1">Unknown</option>
               </select>
             </div>
-            <!-- Home Ownership -->
             <div class="col-md-6">
               <label class="form-label">Home Ownership</label>
-              <select class="form-select form-control-dark" id="home_ownership">
-                <option value="RENT" selected>Rent</option>
-                <option value="OWN">Own</option>
-                <option value="MORTGAGE">Mortgage</option>
-                <option value="OTHER">Other</option>
+              <select class="form-select" id="home_ownership">
+                <option value="RENT" selected>Rent</option><option value="OWN">Own</option>
+                <option value="MORTGAGE">Mortgage</option><option value="OTHER">Other</option>
               </select>
             </div>
-            <!-- Loan Purpose -->
             <div class="col-md-6">
               <label class="form-label">Loan Purpose</label>
-              <select class="form-select form-control-dark" id="purpose">
+              <select class="form-select" id="purpose">
                 <option value="debt_consolidation" selected>Debt Consolidation</option>
                 <option value="credit_card">Credit Card Refinancing</option>
                 <option value="home_improvement">Home Improvement</option>
@@ -508,53 +336,36 @@
                 <option value="other">Other</option>
               </select>
             </div>
-            <!-- Revolving Utilization -->
             <div class="col-md-6">
               <label class="form-label">Revolving Utilisation (%)</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="revol_util" placeholder="e.g. 55.0" step="0.1" min="0" max="100" value="55.0"/>
+              <input type="number" class="form-control" id="revol_util" value="55.0" step="0.1" min="0" max="100"/>
             </div>
-            <!-- Grade -->
             <div class="col-md-6">
               <label class="form-label">Loan Grade</label>
-              <select class="form-select form-control-dark" id="grade">
-                <option value="A">A — Lowest Risk</option>
-                <option value="B">B</option>
-                <option value="C" selected>C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-                <option value="F">F</option>
-                <option value="G">G — Highest Risk</option>
+              <select class="form-select" id="grade" onchange="updateSubgrade()">
+                <option value="A">A — Lowest Risk</option><option value="B">B</option>
+                <option value="C" selected>C</option><option value="D">D</option>
+                <option value="E">E</option><option value="F">F</option><option value="G">G — Highest Risk</option>
               </select>
             </div>
-            <!-- Sub Grade -->
             <div class="col-md-6">
               <label class="form-label">Sub Grade</label>
-              <select class="form-select form-control-dark" id="sub_grade">
-                <option value="C1" selected>C1</option>
-                <option value="C2">C2</option>
-                <option value="C3">C3</option>
-                <option value="C4">C4</option>
-                <option value="C5">C5</option>
+              <select class="form-select" id="sub_grade">
+                <option value="C1" selected>C1</option><option value="C2">C2</option>
+                <option value="C3">C3</option><option value="C4">C4</option><option value="C5">C5</option>
               </select>
             </div>
-            <!-- Total Accounts -->
             <div class="col-md-6">
               <label class="form-label">Total Credit Accounts</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="total_acc" placeholder="e.g. 22" min="1" max="100" value="22"/>
+              <input type="number" class="form-control" id="total_acc" value="22" min="1" max="100"/>
             </div>
-            <!-- Public Records -->
             <div class="col-md-6">
               <label class="form-label">Public Derogatory Records</label>
-              <input type="number" class="form-control form-control-dark"
-                     id="pub_rec" placeholder="e.g. 0" min="0" max="20" value="0"/>
+              <input type="number" class="form-control" id="pub_rec" value="0" min="0" max="20"/>
             </div>
           </div>
-
           <div class="d-grid mt-4">
-            <button class="btn btn-primary-gradient btn-lg" id="predictBtn"
-                    onclick="runPrediction()">
+            <button class="btn btn-primary btn-lg" id="predictBtn" onclick="runPrediction()">
               <i class="bi bi-cpu me-2"></i>
               <span id="predictBtnText">Calculate Default Probability</span>
             </button>
@@ -562,74 +373,72 @@
         </div>
       </div>
 
-      <!-- ── Results Panel ── -->
+      <!-- Results panel -->
       <div class="col-lg-5">
-        <div class="result-panel glass-card p-4 h-100" id="resultPanel">
-          <!-- Placeholder state -->
-          <div id="resultPlaceholder" class="result-placeholder text-center">
-            <div class="placeholder-icon"><i class="bi bi-cpu"></i></div>
-            <p>Fill in the loan details and click<br/><strong>Calculate Default Probability</strong></p>
-            <p class="text-muted small mt-2">Results will appear here with PD score,<br/>IFRS9 stage, ECL, and risk charts.</p>
+        <div class="cr-result-panel" id="resultPanel">
+          <div id="resultPlaceholder" class="cr-placeholder">
+            <div class="cr-placeholder-icon"><i class="bi bi-cpu"></i></div>
+            <p style="color:var(--ar-secondary-color);">Fill in the loan details and click<br><strong style="color:var(--ar-heading-color);">Calculate Default Probability</strong></p>
+            <p style="font-size:.8rem;color:var(--ar-secondary-color);margin-top:.5rem;">Results show PD score, IFRS9 stage,<br>ECL estimate, and risk charts.</p>
           </div>
 
-          <!-- Results (hidden initially) -->
-          <div id="resultContent" class="d-none">
-            <!-- PD Gauge -->
+          <div id="resultContent" style="display:none;">
+            <!-- Gauge -->
             <div class="text-center mb-3">
-              <canvas id="gaugeChart" width="200" height="120"></canvas>
-              <div id="pdValueDisplay" class="pd-big-number"></div>
-              <div id="pdLabelDisplay" class="pd-label"></div>
+              <canvas id="gaugeChart" width="200" height="120" style="display:block;margin:0 auto;"></canvas>
+              <div id="pdValueDisplay" class="cr-pd-number"></div>
+              <div class="cr-pd-label">Probability of Default</div>
             </div>
 
-            <!-- Risk indicator bar -->
-            <div class="risk-bar-wrap mb-4">
-              <div class="risk-bar-track">
-                <div class="risk-bar-zones">
-                  <div class="rz rz-green">Low</div>
-                  <div class="rz rz-amber">Medium</div>
-                  <div class="rz rz-red">High</div>
+            <!-- Risk bar -->
+            <div class="mb-4" style="padding:0 4px;">
+              <div class="cr-risk-track">
+                <div class="cr-risk-zones">
+                  <div class="cr-rz g">Low</div>
+                  <div class="cr-rz a">Medium</div>
+                  <div class="cr-rz r">High</div>
                 </div>
-                <div class="risk-needle" id="riskNeedle"></div>
+                <div class="cr-needle" id="riskNeedle"></div>
               </div>
             </div>
 
-            <!-- Result cards -->
+            <!-- Mini cards -->
             <div class="row g-2 mb-3">
               <div class="col-6">
-                <div class="result-mini-card text-center" id="resultStageCard">
-                  <div class="rmc-label">IFRS9 Stage</div>
-                  <div class="rmc-value" id="resultStage">—</div>
+                <div class="cr-mini-card" id="stageCard">
+                  <div class="cr-mini-lbl">IFRS9 Stage</div>
+                  <div class="cr-mini-val" id="resultStage">—</div>
                 </div>
               </div>
               <div class="col-6">
-                <div class="result-mini-card text-center">
-                  <div class="rmc-label">Expected Loss</div>
-                  <div class="rmc-value text-warning" id="resultECL">—</div>
+                <div class="cr-mini-card">
+                  <div class="cr-mini-lbl">Expected Loss</div>
+                  <div class="cr-mini-val" style="color:var(--ar-warning);" id="resultECL">—</div>
                 </div>
               </div>
               <div class="col-6">
-                <div class="result-mini-card text-center">
-                  <div class="rmc-label">Risk Category</div>
-                  <div class="rmc-value" id="resultRisk">—</div>
+                <div class="cr-mini-card">
+                  <div class="cr-mini-lbl">Risk Category</div>
+                  <div class="cr-mini-val" id="resultRisk">—</div>
                 </div>
               </div>
               <div class="col-6">
-                <div class="result-mini-card text-center">
-                  <div class="rmc-label">Decision</div>
-                  <div class="rmc-value" id="resultDecision">—</div>
+                <div class="cr-mini-card">
+                  <div class="cr-mini-lbl">Decision</div>
+                  <div class="cr-mini-val" id="resultDecision">—</div>
                 </div>
               </div>
             </div>
 
-            <!-- Radar chart -->
+            <!-- Radar -->
             <div class="mb-3">
               <canvas id="radarChart" height="200"></canvas>
             </div>
 
-            <!-- Recommendation box -->
-            <div class="recommendation-box" id="recommendationBox">
-              <div class="rec-title"><i class="bi bi-lightbulb me-2"></i>Recommendation</div>
-              <div class="rec-body" id="recommendationText"></div>
+            <!-- Recommendation -->
+            <div class="cr-rec">
+              <div class="cr-rec-title"><i class="bi bi-lightbulb me-2"></i>Recommendation</div>
+              <div class="cr-rec-body" id="recommendationText"></div>
             </div>
           </div>
         </div>
@@ -638,41 +447,300 @@
   </div>
 </section>
 
-<!-- ═══════════════════════════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════════════════════════ -->
-<footer class="footer-section">
+<!-- ═══════════════════════════════════════════════ FOOTER -->
+<footer class="cr-footer">
   <div class="container">
     <div class="row align-items-center">
       <div class="col-md-6 mb-3 mb-md-0">
-        <div class="footer-brand">CreditRisk<span class="brand-accent">PD</span></div>
-        <p class="footer-sub mt-2">
-          End-to-end credit risk modelling pipeline.<br/>
-          Built for EXL, Deloitte, EY, KPMG analytics placement.
-        </p>
+        <div class="cr-footer-brand">CreditRisk<span style="color:var(--ar-primary);">PD</span></div>
+        <p style="font-size:.8rem;color:var(--ar-secondary-color);margin:.5rem 0 0;">End-to-end credit risk modelling pipeline.<br></p>
       </div>
       <div class="col-md-6 text-md-end">
-        <div class="footer-author mb-2">
-          <strong>Manish Kumar</strong> — MBA Business Economics, DBE, University of Delhi
+        <div style="font-size:.85rem;color:var(--ar-secondary-color);margin-bottom:.5rem;">
+          <strong style="color:var(--ar-heading-color);">Manish Kumar</strong> — MBA Business Economics, DBE, University of Delhi
         </div>
-        <div class="footer-links d-flex gap-3 justify-content-md-end">
-          <a href="https://linkedin.com/in/manish-kumarrr" target="_blank" class="footer-link">
-            <i class="bi bi-linkedin me-1"></i>LinkedIn
-          </a>
-          <a href="https://github.com/YOUR_USERNAME" target="_blank" class="footer-link">
-            <i class="bi bi-github me-1"></i>GitHub
-          </a>
-          <a href="mailto:your.email@example.com" class="footer-link">
-            <i class="bi bi-envelope me-1"></i>Email
-          </a>
+        <div class="d-flex gap-3 justify-content-md-end">
+          <a href="https://linkedin.com/in/manish-kumarrr" target="_blank" class="cr-footer-link"><i class="bi bi-linkedin me-1"></i>LinkedIn</a>
+          <a href="https://github.com/YOUR_USERNAME" target="_blank" class="cr-footer-link"><i class="bi bi-github me-1"></i>GitHub</a>
+          <a href="mailto:your.email@example.com" class="cr-footer-link"><i class="bi bi-envelope me-1"></i>Email</a>
         </div>
-        <div class="footer-copy mt-2">© 2025 MIT License</div>
+        <div style="font-size:.75rem;color:var(--ar-secondary-color);margin-top:.5rem;">© 2025 MIT License</div>
       </div>
     </div>
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="script.js"></script>
+<!-- Bootstrap JS (included in Around theme bundle) -->
+<script src="https://around.createx.studio/assets/js/theme.min.js"></script>
+
+<!-- ═══════════════════════════════════════════════ ALL JS INLINE -->
+<script>
+'use strict';
+
+/* ── Around theme CSS vars mapped to chart colours ────────── */
+const C = {
+  primary:  '#448c74',
+  success:  '#3fca90',
+  warning:  '#edcb50',
+  danger:   '#ed5050',
+  info:     '#3f7fca',
+  text:     'rgba(255,255,255,0.5)',
+  grid:     'rgba(255,255,255,0.07)',
+  bg:       'rgba(255,255,255,0.03)',
+};
+
+/* ── Chart.js global defaults ───────────────────────────────── */
+Chart.defaults.color       = C.text;
+Chart.defaults.font.family = 'Inter, sans-serif';
+Chart.defaults.font.size   = 11;
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+
+/* ── Chart instances ──────────────────────────────────────── */
+let heroInst, rocInst, ivInst, donutInst, eclInst, gaugeInst, radarInst;
+
+/* ── Encoding maps ────────────────────────────────────────── */
+const GRADE_ENC    = { A:0, B:1, C:2, D:3, E:4, F:5, G:6 };
+const SUBGRADE_ENC = {};
+['A','B','C','D','E','F','G'].forEach((g,gi) => {
+  [1,2,3,4,5].forEach((n,ni) => { SUBGRADE_ENC[`${g}${n}`] = gi*5+ni; });
+});
+const HOME_ENC    = { RENT:0, OWN:1, MORTGAGE:2, OTHER:3 };
+const PURPOSE_ENC = { debt_consolidation:0, credit_card:1, home_improvement:2, major_purchase:3, medical:4, car:5, small_business:6, vacation:7, moving:8, other:9 };
+
+/* ── LR coefficients (StandardScaler-normalised weights) ─── */
+const COEF = {
+  int_rate:.48, sub_grade_enc:.44, grade_enc:.38,
+  loan_to_income:.22, installment_burden:.19, dti:.16,
+  revol_util:.12, home_ownership_enc:-.08,
+  annual_inc:-.15, pub_rec:.14, total_acc:-.05,
+};
+const INTERCEPT = -1.85;
+const LGD = 0.45;
+
+/* ── Normalisation stats from training data ─────────────── */
+const MEANS = { int_rate:13.26, sub_grade_enc:12.5, grade_enc:2.5, loan_to_income:.28, installment_burden:.09, dti:18.2, revol_util:54.8, home_ownership_enc:.8, annual_inc:75000, pub_rec:.18, total_acc:25.4 };
+const STDS  = { int_rate:4.8,   sub_grade_enc:8.2,  grade_enc:1.7, loan_to_income:.22, installment_burden:.07, dti:11.5, revol_util:24.3, home_ownership_enc:.9, annual_inc:65000, pub_rec:.55, total_acc:12.1 };
+
+/* ─────────────────────────────────────────────────────────────
+   PREDICTION ENTRY POINT
+   To switch to Flask: replace simulatePD(inputs) with
+   fetchFromAPI(inputs) — everything else stays the same.
+───────────────────────────────────────────────────────────── */
+async function runPrediction() {
+  const btn    = document.getElementById('predictBtn');
+  const btnTxt = document.getElementById('predictBtnText');
+  btnTxt.innerHTML = '<span class="cr-spinner"></span>Calculating…';
+  btn.disabled = true;
+  try {
+    const inputs = collectInputs();
+    const result = await simulatePD(inputs);   // ← swap this for fetchFromAPI(inputs)
+    renderResults(result);
+  } catch(e) {
+    console.error(e);
+    alert('Something went wrong. Check console.');
+  } finally {
+    btnTxt.innerHTML = '<i class="bi bi-cpu me-2"></i>Calculate Default Probability';
+    btn.disabled = false;
+  }
+}
+
+function collectInputs() {
+  const loanAmnt  = +document.getElementById('loan_amnt').value  || 15000;
+  const intRate   = +document.getElementById('int_rate').value   || 13.5;
+  const annualInc = +document.getElementById('annual_inc').value || 60000;
+  const dti       = +document.getElementById('dti').value        || 18.5;
+  const revolUtil = +document.getElementById('revol_util').value || 55;
+  const totalAcc  = +document.getElementById('total_acc').value  || 22;
+  const pubRec    = +document.getElementById('pub_rec').value    || 0;
+  const grade     = document.getElementById('grade').value;
+  const subGrade  = document.getElementById('sub_grade').value;
+  const homeOwn   = document.getElementById('home_ownership').value;
+  const purpose   = document.getElementById('purpose').value;
+
+  const installment       = (loanAmnt*(intRate/100/12)) / (1-Math.pow(1+intRate/100/12,-36));
+  const loan_to_income    = loanAmnt / (annualInc+1);
+  const installment_burden= installment / ((annualInc/12)+1);
+
+  return { loanAmnt, intRate, annualInc, dti, revolUtil, totalAcc, pubRec, grade, subGrade, homeOwn, purpose, installment, loan_to_income, installment_burden,
+    grade_enc:          GRADE_ENC[grade] ?? 2,
+    sub_grade_enc:      SUBGRADE_ENC[subGrade] ?? 10,
+    home_ownership_enc: HOME_ENC[homeOwn] ?? 0,
+    purpose_enc:        PURPOSE_ENC[purpose] ?? 0,
+  };
+}
+
+async function simulatePD(inp) {
+  await new Promise(r => setTimeout(r, 750));
+  let logit = INTERCEPT;
+  for (const [k, coef] of Object.entries(COEF)) {
+    const raw = { int_rate:inp.intRate, sub_grade_enc:inp.sub_grade_enc, grade_enc:inp.grade_enc,
+      loan_to_income:inp.loan_to_income, installment_burden:inp.installment_burden,
+      dti:inp.dti, revol_util:inp.revolUtil, home_ownership_enc:inp.home_ownership_enc,
+      annual_inc:inp.annualInc, pub_rec:inp.pubRec, total_acc:inp.totalAcc }[k] ?? 0;
+    logit += coef * ((raw - (MEANS[k]||0)) / ((STDS[k]||1)||1));
+  }
+  const pd  = Math.min(.95, Math.max(.02, 1/(1+Math.exp(-logit))));
+  const ecl = pd * LGD * inp.loanAmnt;
+  const stage = pd < .05 ? 1 : pd < .20 ? 2 : 3;
+  const riskCategory = pd < .15 ? 'Low Risk' : pd < .40 ? 'Medium Risk' : 'High Risk';
+  const decision     = pd < .15 ? 'Approve'  : pd < .30 ? 'Review'      : pd < .50 ? 'Caution' : 'Decline';
+  const radarScores  = {
+    'Interest Rate':  Math.min(100,(inp.intRate/36)*100),
+    'DTI Ratio':      Math.min(100,(inp.dti/50)*100),
+    'Loan Burden':    Math.min(100,inp.installment_burden*600),
+    'Credit Util':    Math.min(100,inp.revolUtil),
+    'Loan-to-Income': Math.min(100,inp.loan_to_income*250),
+    'Public Records': Math.min(100,inp.pubRec*50),
+  };
+  return { pd, ecl, stage, riskCategory, decision, radarScores };
+}
+
+/* Flask API version — swap simulatePD with this when backend ready */
+async function fetchFromAPI(inp) {
+  const res = await fetch('http://localhost:5000/predict', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ loan_amnt:inp.loanAmnt, int_rate:inp.intRate, annual_inc:inp.annualInc,
+      dti:inp.dti, home_ownership:inp.homeOwn, purpose:inp.purpose, revol_util:inp.revolUtil,
+      grade:inp.grade, sub_grade:inp.subGrade, total_acc:inp.totalAcc, pub_rec:inp.pubRec }),
+  });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return res.json();
+}
+
+/* ── Render all results ─────────────────────────────────────── */
+function renderResults({ pd, ecl, stage, riskCategory, decision, radarScores }) {
+  document.getElementById('resultPlaceholder').style.display = 'none';
+  document.getElementById('resultContent').style.display     = 'block';
+
+  const col = pdColor(pd);
+  document.getElementById('pdValueDisplay').textContent = (pd*100).toFixed(1)+'%';
+  document.getElementById('pdValueDisplay').style.color = col;
+  document.getElementById('riskNeedle').style.left = Math.min(96,Math.max(4,pd*100))+'%';
+
+  const stageLabels = { 1:'Stage 1', 2:'Stage 2', 3:'Stage 3' };
+  const sc = document.getElementById('stageCard');
+  sc.className = `cr-mini-card cr-stage-result-${stage}`;
+  document.getElementById('resultStage').textContent   = stageLabels[stage];
+  document.getElementById('resultStage').style.color   = stageColor(stage);
+  document.getElementById('resultECL').textContent     = '$'+Math.round(ecl).toLocaleString();
+  document.getElementById('resultRisk').textContent    = riskCategory;
+  document.getElementById('resultRisk').style.color    = col;
+  document.getElementById('resultDecision').textContent= decision;
+  document.getElementById('resultDecision').style.color= decisionColor(decision);
+  document.getElementById('recommendationText').textContent = buildRec(pd, stage);
+
+  drawGauge(pd);
+  drawRadar(radarScores);
+}
+
+function drawGauge(pd) {
+  if (gaugeInst) gaugeInst.destroy();
+  gaugeInst = new Chart(document.getElementById('gaugeChart').getContext('2d'), {
+    type: 'doughnut',
+    data: { datasets: [{ data:[pd,1-pd], backgroundColor:[pdColor(pd),'rgba(255,255,255,.05)'], borderWidth:0, circumference:180, rotation:270 }] },
+    options: { responsive:false, cutout:'72%', plugins:{ legend:{display:false}, tooltip:{enabled:false} }, animation:{ duration:800, easing:'easeOutQuart' } },
+  });
+}
+
+function drawRadar(scores) {
+  if (radarInst) radarInst.destroy();
+  radarInst = new Chart(document.getElementById('radarChart').getContext('2d'), {
+    type: 'radar',
+    data: { labels: Object.keys(scores), datasets:[{ label:'Risk factors', data:Object.values(scores), backgroundColor:'rgba(68,140,116,.15)', borderColor:C.primary, borderWidth:2, pointBackgroundColor:C.primary, pointRadius:3 }] },
+    options: { responsive:true, scales:{ r:{ min:0,max:100, grid:{color:C.grid}, angleLines:{color:C.grid}, ticks:{display:false}, pointLabels:{font:{size:10},color:C.text} } }, plugins:{legend:{display:false}}, animation:{duration:600} },
+  });
+}
+
+function buildRec(pd, stage) {
+  if (pd<.15) return 'Low default risk. This application can be approved at the current rate. Stage 1 classification means a 12-month ECL provision is sufficient.';
+  if (pd<.30) return 'Moderate risk. Consider requesting additional collateral or reducing the loan amount. A shorter tenure may lower the PD below the 20% Stage 3 threshold.';
+  if (pd<.50) return 'Elevated risk (Stage 3). Full lifetime ECL provisioning required. Consider declining or reducing the loan amount significantly with stricter repayment monitoring.';
+  return `High default risk (PD ${(pd*100).toFixed(0)}%). Recommend declining this application. Primary drivers: high interest rate and DTI. Refer applicant to financial counselling.`;
+}
+
+/* ── Colour helpers ──────────────────────────────────────── */
+function pdColor(pd)       { return pd<.15?C.success:pd<.35?C.warning:C.danger; }
+function stageColor(s)     { return {1:C.success,2:C.warning,3:C.danger}[s]??C.text; }
+function decisionColor(d)  { return {Approve:C.success,Review:C.warning,Caution:C.warning,Decline:C.danger}[d]??C.text; }
+
+/* ── Sub-grade dropdown update ────────────────────────────── */
+function updateSubgrade() {
+  const g = document.getElementById('grade').value;
+  document.getElementById('sub_grade').innerHTML =
+    [1,2,3,4,5].map(n=>`<option value="${g}${n}">${g}${n}</option>`).join('');
+}
+
+/* ── Navbar scroll effect ─────────────────────────────────── */
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('mainNav');
+  nav.style.background = window.scrollY>60 ? 'rgba(18,21,25,.98)' : 'rgba(18,21,25,.9)';
+});
+
+/* ── Initialise all static charts on load ─────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Hero chart — PD distribution
+  heroInst = new Chart(document.getElementById('heroChart').getContext('2d'), {
+    type:'bar',
+    data:{ labels:['0–5%','5–10%','10–20%','20–30%','30–40%','40–50%','50%+'],
+           datasets:[{ data:[55,6631,22128,28046,31120,30943,82287],
+             backgroundColor:[C.success,C.warning,C.danger,C.danger,C.danger,C.danger,C.danger],
+             borderWidth:0, borderRadius:3 }] },
+    options:{ responsive:true, plugins:{legend:{display:false},tooltip:{enabled:false}}, scales:{x:{display:false},y:{display:false}}, animation:{duration:1200} },
+  });
+
+  // ROC curve
+  function rocPts(auc,n=40) {
+    const pts=[{x:0,y:0}];
+    for(let i=1;i<n;i++){const fpr=i/n; pts.push({x:Math.round(fpr*100)/100,y:Math.min(1,auc*fpr+(1-auc)*Math.pow(fpr,.35))});}
+    pts.push({x:1,y:1}); return pts;
+  }
+  rocInst = new Chart(document.getElementById('rocChart').getContext('2d'),{
+    type:'scatter',
+    data:{ datasets:[
+      {label:'Logistic Reg (AUC 0.668)',data:rocPts(.6679),borderColor:C.info, backgroundColor:'transparent',showLine:true,tension:.3,pointRadius:0,borderWidth:2},
+      {label:'Random Forest (AUC 0.689)',data:rocPts(.6889),borderColor:C.warning,backgroundColor:'transparent',showLine:true,tension:.3,pointRadius:0,borderWidth:2},
+      {label:'Random baseline',data:[{x:0,y:0},{x:1,y:1}],borderColor:'rgba(255,255,255,.15)',backgroundColor:'transparent',showLine:true,pointRadius:0,borderDash:[5,5],borderWidth:1},
+    ]},
+    options:{ responsive:true, plugins:{legend:{position:'bottom',labels:{color:C.text}}},
+      scales:{ x:{title:{display:true,text:'False Positive Rate',color:C.text},grid:{color:C.grid},min:0,max:1},
+               y:{title:{display:true,text:'True Positive Rate',color:C.text},grid:{color:C.grid},min:0,max:1} } },
+  });
+
+  // IV bar chart
+  ivInst = new Chart(document.getElementById('ivChart').getContext('2d'),{
+    type:'bar',
+    data:{ labels:['sub_grade','int_rate','grade','loan_to_income','install_burden','dti','loan_amnt','revol_util'],
+           datasets:[{ label:'IV score', data:[.479,.446,.398,.119,.096,.074,.034,.026],
+             backgroundColor:[C.danger,C.danger,C.danger,C.warning,C.warning,C.info,C.info,C.info],
+             borderWidth:0, borderRadius:4 }] },
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false}},
+      scales:{x:{grid:{color:C.grid},ticks:{color:C.text}},y:{grid:{display:false},ticks:{color:C.text}}} },
+  });
+
+  // IFRS9 donut
+  donutInst = new Chart(document.getElementById('ifrs9DonutChart').getContext('2d'),{
+    type:'doughnut',
+    data:{ labels:['Stage 1 (PD<5%)','Stage 2 (PD 5–20%)','Stage 3 (PD>20%)'],
+           datasets:[{ data:[55,19444,241711], backgroundColor:[C.success,C.warning,C.danger], borderWidth:2, borderColor:'rgba(18,21,25,.8)', hoverOffset:8 }] },
+    options:{ responsive:true, cutout:'60%', plugins:{ legend:{position:'bottom',labels:{color:C.text,padding:16}},
+      tooltip:{callbacks:{label:ctx=>{const t=261210;return ` ${ctx.label}: ${ctx.raw.toLocaleString()} (${(ctx.raw/t*100).toFixed(1)}%)`;}}} },
+      animation:{duration:1000,easing:'easeOutQuart'} },
+  });
+
+  // ECL bar
+  eclInst = new Chart(document.getElementById('eclChart').getContext('2d'),{
+    type:'bar',
+    data:{ labels:['Stage 1','Stage 2','Stage 3'],
+           datasets:[{ label:'ECL ($M)', data:[.014502,18.302,775.008],
+             backgroundColor:[C.success,C.warning,C.danger], borderWidth:0, borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>`$${ctx.raw.toFixed(2)}M`}}},
+      scales:{ x:{grid:{display:false},ticks:{color:C.text}},
+               y:{grid:{color:C.grid},ticks:{color:C.text,callback:v=>'$'+v.toFixed(0)+'M'}} },
+      animation:{duration:1000,easing:'easeOutQuart'} },
+  });
+});
+</script>
+
 </body>
 </html>

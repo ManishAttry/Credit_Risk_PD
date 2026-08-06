@@ -12,20 +12,12 @@
 
 ---
 
-*End-to-end credit risk modelling pipeline — from raw LendingClub data to IFRS9 provisioning.*
+*End-to-end machine learning pipeline for Probability of Default prediction, IFRS9 staging, Expected Credit Loss estimation, and interactive Power BI analytics.*
 
 </div>
 
 ---
 
-Every time a bank lends money, it takes on **credit risk** — the probability that the borrower will fail to repay. Globally, banks hold trillions of dollars in loan portfolios, and even a 1% increase in default rates can translate to billions in losses.
-
-**The scale of the problem:**
-- Global non-performing loans (NPLs) exceeded **$1.5 trillion** in 2023
-- A single basis-point error in default estimation can cost a mid-sized bank **$10–50 million** in under-provisioning
-- Regulators (Basel III, IFRS9) now mandate that banks model and disclose expected credit losses proactively
-
----
 
 ## ✨ Project Features
 
@@ -90,9 +82,10 @@ Every time a bank lends money, it takes on **credit risk** — the probability t
 ```
 credit_risk_pd/
 │
+├── 📂 assets/                 # All readme Screenshots, icons, images
 ├── 📂 data/
 │   ├── raw/                    # Original CSV — never modified
-│   │   └── loan.csv            # LendingClub dataset (1.2 GB)
+│   │   └── loan.csv            # Put Original LendingClub dataset (1.2 GB)
 │   └── processed/              # Cleaned outputs from notebooks
 │       ├── scored_loans.csv         # Test set with PD scores + IFRS9 stage
 │       ├── scored_loans_slim.csv    # Reduced file for Power BI (<10MB)
@@ -104,11 +97,8 @@ credit_risk_pd/
 │   └── 03_model_shap.ipynb     # Model training, evaluation, IFRS9, export
 │
 ├── 📂 website/                 # Standalone web application
-│   ├── index.html              # Main page + prediction interface
-│   ├── style.css               # Dark glassmorphism theme
-│   ├── script.js               # Prediction logic + Chart.js
-│   └── assets/                 # Screenshots, icons, images
-│
+│   └── index.html              # Main page + prediction interface
+│   
 ├── 📂 dashboard/
 │   └── credit_risk_pd.pbix     # Power BI Desktop file
 │
@@ -181,90 +171,6 @@ The Power BI dashboard (`credit_risk_pd.pbix`) connects directly to the 4 output
 
 ---
 
-## 🛠 Installation
-
-### Prerequisites
-
-- Python 3.9 or higher
-- VS Code (recommended) or any code editor
-- Git
-
-### Step 1 — Clone the repository
-
-```bash
-# Clone the project to your local machine
-git clone https://github.com/YOUR_USERNAME/credit-risk-pd-model.git
-
-# Navigate into the project folder
-cd credit-risk-pd-model
-```
-
-### Step 2 — Create a virtual environment
-
-A virtual environment isolates this project's dependencies from your global Python installation. This prevents version conflicts across projects.
-
-**Windows:**
-```bash
-# Create the virtual environment in a folder called .venv
-python -m venv .venv
-
-# Activate it — your terminal prompt will show (.venv) when active
-.venv\Scripts\activate
-```
-
-**macOS / Linux:**
-```bash
-# Create the virtual environment
-python3 -m venv .venv
-
-# Activate it
-source .venv/bin/activate
-```
-
-**To deactivate when done:**
-```bash
-deactivate
-```
-
-### Step 3 — Install dependencies
-
-```bash
-# Install all required packages from requirements.txt
-pip install -r requirements.txt
-```
-
-This installs: pandas, numpy, matplotlib, seaborn, scikit-learn, imbalanced-learn, xgboost, shap, notebook, openpyxl, and kagglehub.
-
-### Step 4 — Download the dataset
-
-Option A — Kaggle CLI (recommended):
-```bash
-# Install Kaggle CLI (if not already installed)
-pip install kaggle
-
-# Download LendingClub dataset (~1.2 GB)
-kaggle datasets download -d wordsforthewise/lending-club -p data/raw/ --unzip
-```
-
-Option B — Manual download:
-1. Go to https://www.kaggle.com/datasets/wordsforthewise/lending-club
-2. Click Download
-3. Extract `loan.csv` to `data/raw/`
-
-### Step 5 — Launch Jupyter Notebook
-
-```bash
-# Start the Jupyter Notebook server
-# This opens a browser tab at http://localhost:8888
-jupyter notebook
-```
-
-Open the notebooks in order:
-1. `notebooks/01_eda.ipynb` — Data loading, EDA, cleaning
-2. `notebooks/03_model_shap.ipynb` — Feature selection, modelling, IFRS9, export
-
----
-
 ## 💡 To use these templates
 Templates are provided either as Power BI Desktop (.pbix) or [Power BI projects (.pbip)](https://learn.microsoft.com/en-us/power-bi/developer/projects/projects-overview) files. I recommend that you use the .pbip format. 
 
@@ -280,10 +186,51 @@ To use these templates, I recommend that you _clone_ (or copy) this Git repo to 
 5. __Clone the repository.__ In the GUI, you should select an option "clone repository". From here, you can enter the HTTPS URL. You can also initiate this from GitHub, itself, via the _code_ button.
 
 > <br>
-> Use this URL when cloning the repo: https://github.com/data-goblin/powerbi-macguyver-toolbox.git
+> Use this URL when cloning the repo: https://github.com/ManishAttry/Credit_Risk_PD/
 > <br><br>
 
 <br>
+
+
+### Create a virtual environment
+
+A virtual environment isolates this project's dependencies from your global Python installation. This prevents version conflicts across projects.
+
+**Windows:**
+```bash
+# Create the virtual environment in a folder called .venv
+python -m venv .venv
+
+# Activate it — your terminal prompt will show (.venv) when active
+.venv\Scripts\activate
+
+# Install all required packages from requirements.txt
+pip install -r requirements.txt
+```
+
+This installs: pandas, numpy, matplotlib, seaborn, scikit-learn, imbalanced-learn, xgboost, shap, notebook, openpyxl, and kagglehub.
+
+### Download the dataset
+
+Option A — Kaggle CLI (recommended):
+```bash
+# Install Kaggle CLI (if not already installed)
+pip install kaggle
+
+# Download LendingClub dataset (~1.2 GB)
+kaggle datasets download -d wordsforthewise/lending-club -p data/raw/ --unzip
+```
+
+Option B — Manual download:
+1. Go to https://www.kaggle.com/datasets/wordsforthewise/lending-club
+2. Click Download
+3. Extract `loan.csv` to `data/raw/`
+
+Open the notebooks in order:
+`Credit_RIsk_PD.ipynb`
+
+
+
 
 ![An image depicting how to clone a repository in VS code](assets/clone-repo-vscode.png)
 
@@ -309,16 +256,13 @@ __I recommend the .pbip format for templates for the following reasons:__
 
 <br><br>
 
-![Image header "bar chart templates"](assets/bar-chart-templates.png)
-
-
 ## 👤 Author
 
 **Manish Kumar**  
 MBA — Business Economics | Department of Business Economics, University of Delhi (2027)  
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/manish-kumarrr)
-[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/YOUR_USERNAME)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ManishAttry)
 [![Email](https://img.shields.io/badge/Email-Contact-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:your.email@example.com)
 
 ---
