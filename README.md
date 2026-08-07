@@ -2,13 +2,20 @@
 
 ![Image header "Power BI macguyver toolbox templates and examples for your Power BI reports"](assets/Credit_Risk_PD_banner.png)
 
-**Probability of Default Modelling with IFRS9 Staging & Expected Credit Loss Estimation**
-
-[![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3+-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
-[![Power BI](https://img.shields.io/badge/Power%20BI-Dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://powerbi.microsoft.com)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=for-the-badge)]()
+<table width="100%">
+  <tr>
+    <td align="left" border="0">
+      <a href="https://manishattry.github.io/credit_risk.html" target="_blank">
+        <img src="https://img.shields.io/badge/🚀_Live_Demo-Predict_Default-239120?style=for-the-badge&logo=github&logoColor=white" height="42" alt="Live Demo" />
+      </a>
+    </td>
+    <td align="right" border="0">
+      <a href="https://nbviewer.org/github/ManishAttry/Credit_Risk_PD/blob/main/notebooks/Credit_RIsk_PD.ipynb" target="_blank">
+        <img src="https://img.shields.io/badge/📖_View_Notebook-nbviewer-orange?style=for-the-badge&logo=jupyter" height="42" alt="View Notebook" />
+      </a>
+    </td>
+  </tr>
+</table>
 
 ---
 
