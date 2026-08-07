@@ -10,7 +10,7 @@
       </a>
     </td>
     <td align="right" border="0">
-      <a href="https://nbviewer.org/github/ManishAttry/Credit_Risk_PD/blob/main/notebooks/Credit_RIsk_PD.ipynb" target="_blank">
+      <a href="https://github.com/ManishAttry/Credit_Risk_PD/blob/main/notebooks/Credit_RIsk_PD.ipynb" target="_blank">
         <img src="https://img.shields.io/badge/📖_View_Notebook-nbviewer-orange?style=for-the-badge&logo=jupyter" height="42" alt="View Notebook" />
       </a>
     </td>
